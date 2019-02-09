@@ -24,6 +24,9 @@ def get_chat_id(data):
     return chat_id
 
 def get_message_author(data):
+    """
+    Retrieves a user's first name and identifier from a telegram message object
+    """
     if (data.get('edited_message', '') != ''):
         user_name = data['edited_message']['from']['first_name']
         user_id = data['edited_message']['from']['id']
@@ -38,7 +41,7 @@ def send_message(prepared_data):
     Prepared data should be json which includes at least `chat_id` and `text`
     """ 
     message_url = BOT_URL + 'sendMessage'
-    requests.post(message_url, json=prepared_data)  # don't forget to make import 
+    requests.post(message_url, json=prepared_data)
 
 
 def prepare_data_for_answer(data, content):
@@ -62,6 +65,9 @@ def get_message(data):
     return message_text
 
 def init_db():
+    """
+    Initiate database connection, create indices
+    """
     client = MongoClient(CONFIG['MONGO_HOST'], CONFIG['MONGO_PORT'])
     db = client[CONFIG['DB_NAME']]
     disable_for_chat_collection = db[CONFIG['DB_DISABLE_COLLECTION']]
@@ -73,6 +79,9 @@ def init_db():
     return disable_for_chat_collection, top_collection
 
 def get_disabled(collection, chat_id):
+    """
+    Database exploration to find out whether the bot is disabled for the chat passed as argument
+    """
     disabled_doc = collection.find_one({'chat_id': chat_id})
     if (disabled_doc is None):
         print("no disable for this chat")
@@ -94,6 +103,7 @@ def main():
     disabled_doc = get_disabled(disable_for_chat_collection, chat_id)
 
     if disabled_doc['disabled']:
+        # Enable the bot for the current chat
         if RE["ENABLE"].search(text):
             answer_content = answer("ENABLE")
             disable_for_chat_collection.find_one_and_update({ 'chat_id': chat_id }, { '$set': { 'disabled': False } })
@@ -103,6 +113,7 @@ def main():
 
 
     if not disabled_doc['disabled']:
+        # Disables the bot for the current chat
         if RE["DISABLE"].search(text):
             answer_content = answer("DISABLE")
             disable_for_chat_collection.find_one_and_update({ 'chat_id': chat_id }, { '$set': { 'disabled': True } })
@@ -110,6 +121,7 @@ def main():
             send_message(answer_data)
             return response 
 
+        # Someone scored
         if (RE['TOPSCORE'].search(text)):
             author, author_id = get_message_author(data)
             
@@ -119,6 +131,7 @@ def main():
             send_message(answer_data)
             return response
 
+        # Someone asks for the leaderboard
         if (RE['TOP'].search(text)):
             answer_content = top_leaderboard(top_collection, chat_id)
             
@@ -126,6 +139,7 @@ def main():
             send_message(answer_data)
             return response
 
+        # Other commands
         for key, value in RE.items():
             if RE[key].search(text) and not key == 'ENABLE':
                 answer_content = answer(key)
