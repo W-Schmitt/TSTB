@@ -1,9 +1,5 @@
-import requests
-import re
+import requests, re, json
 from bottle import run, post, response, request as bottle_request
-import pickle
-import json
-import os
 from pymongo import MongoClient, ASCENDING
 from answers import answer
 from config import CONFIG
