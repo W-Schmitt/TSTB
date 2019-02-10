@@ -12,5 +12,9 @@ ANSWERS = {
     ]
 }
 
-def answer(string):
-    return ANSWERS[string][random.randint(0, len(ANSWERS[string]) - 1)]
+def answer(arr):
+    if type(arr) == type(''):
+        _arr = ANSWERS[arr]
+    else:
+        _arr = arr
+    return _arr[random.randint(0, len(_arr) - 1)]

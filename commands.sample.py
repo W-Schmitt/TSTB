@@ -1,19 +1,36 @@
 import re
+import random
+from answers import answer
 
 RE_SPECIAL = {
     "RE_START": "( |^|\.|\')+",
     "RE_END": "( |$|\.|\')+"
 }
 
-RE_TEMPLATES = {
-    "TOPSCORE": "YOUR-SCORING-REGEX",
-    "TOP": "YOUR-LEADERBOARD-COMMAND",
+COMMAND_TEMPLATES = {
+    "TOPSCORE": {
+        "RE": "YOUR-scoring-COMMAND-REGEX",
+        "FUNCTION": answer
+    },
+    "TOP": {
+        "RE": "YOUR-LEADERBOARD-COMMAND-REGEX",
+        "FUNCTION": answer
+    },
     # INSERT YOUR COMMANDS HERE
-    "ENABLE": "YOUR-ENABLE-COMMAND",
-    "DISABLE": "YOUR-DISABLE-COMMAND"
+    "ENABLE": {
+        "RE": "YOUR-ENABLE-COMMAND-REGEX",
+        "FUNCTION": answer
+    },
+    "DISABLE": {
+        "RE": "YOUR-DISABLE-COMMAND-REGEX",
+        "FUNCTION": answer
+    },
 }
 
-RE = {}
+COMMANDS = {}
 
-for key, tmpl in RE_TEMPLATES.items():
-    RE[key] = re.compile(RE_SPECIAL["RE_START"] + tmpl + RE_SPECIAL["RE_END"], re.IGNORECASE)
+for key, cmd in COMMAND_TEMPLATES.items():
+    COMMANDS[key] = {
+        "RE": re.compile(RE_SPECIAL["RE_START"] + cmd['RE'] + RE_SPECIAL["RE_END"], re.IGNORECASE),
+        "FUNCTION": cmd['FUNCTION']
+    }
